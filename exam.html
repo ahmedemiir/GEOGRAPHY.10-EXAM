@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Geography Exam Portal</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --success: #16a34a;
+            --error: #dc2626;
+            --warning: #d97706;
+            --bg: #f1f5f9;
+            --secondary: #344b6c;
+        }
+
+        body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); margin: 0; padding: 20px; user-select: none; }
+        .container { max-width: 900px; margin: 20px auto; background: #ffffff; padding: 35px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .hidden { display: none !important; }
+        
+        .exam-header { display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: white; padding: 15px 0; border-bottom: 2px solid #e2e8f0; z-index: 100; margin-bottom: 20px; }
+        .timer-box { color: var(--error); font-weight: 800; font-size: 1.2rem; border: 2px solid var(--error); padding: 5px 15px; border-radius: 8px; }
+
+        /* Palette Grid Style */
+        .palette-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 8px; margin-bottom: 20px; padding: 15px; background: #f8fafc; border-radius: 10px; border: 1px solid #e2e8f0; }
+        .palette-btn { width: 40px; height: 40px; border: 1px solid #cbd5e1; background: #ffffff; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .palette-btn.active { border: 2px solid var(--primary); }
+        .palette-btn.answered { background: #dcfce7; color: #15803d; border-color: #86efac; }
+        .palette-btn.flagged { background: #fef3c7; color: #b45309; border-color: #fde047; }
+        
+        .question-box { display: none; margin-bottom: 20px; padding: 25px; border: 1px solid #e2e8f0; border-radius: 12px; }
+        .question-box.active { display: block; }
+        
+        input[type="text"], select { width: 100%; padding: 12px; margin: 10px 0 20px; border: 2px solid #e2e8f0; border-radius: 8px; box-sizing: border-box; font-size: 1rem; }
+        .option-label { display: flex; align-items: center; padding: 12px; margin: 8px 0; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+        .option-label:hover { background: #eff6ff; border-color: var(--primary); }
+        input[type="radio"] { margin-right: 15px; transform: scale(1.2); }
+
+        .btn { padding: 12px 20px; border: none; border-radius: 8px; color: white; font-weight: bold; font-size: 1rem; cursor: pointer; transition: 0.2s; }
+        .btn-start { width: 100%; background: var(--primary); font-size: 1.1rem; padding: 15px; }
+        .btn-flag { background: var(--warning); margin-bottom: 15px; }
+        .nav-buttons { display: flex; gap: 15px; margin-top: 20px; }
+        .btn-nav { background: var(--secondary); flex: 1; }
+        .btn-submit { background: var(--success); flex: 1; }
+    </style>
+</head>
+<body oncontextmenu="return false;"> 
+<div class="container">
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen">
+        <h1 style="text-align:center;">Geography Exam Portal</h1>
+        <h2 style="text-align:center; color: var(--secondary);">BELISA AHMED</h2>
+        <p style="text-align: center; color: #64748b;">Enter details and request full screen to begin.</p>
+        <hr>
+        
+        <label><b>Student Full Name</b></label>
+        <input type="text" id="studentName" placeholder="Enter Full Name">
+
+        <label><b>Student ID Number</b></label>
+        <input type="text" id="studentID" placeholder="Enter ID Number">
+        
+        <label><b>Class Section</b></label>
+        <select id="classSection">
+            <option value="" disabled selected>-- Select Section --</option>
+            <option value="10A">10A</option><option value="10B">10B</option>
+            <option value="10C">10C</option><option value="10D">10D</option>
+            <option value="10E">10E</option>
+        </select>
+        
+        <label><b>Access Code</b></label>
+        <input type="text" id="accessCode" placeholder="Enter Code">
+        
+        <button class="btn btn-start" onclick="startExam()">Begin Examination (Fullscreen Required)</button>
+        <p id="login-error" style="color:red; text-align:center; display:none; margin-top:15px;">Please fill all fields correctly.</p>
+    </div>
+
+    <!-- EXAM SCREEN -->
+    <div id="exam-screen" class="hidden">
+        <div class="exam-header">
+            <div id="welcome-user" style="font-weight: bold; color: var(--primary);"></div>
+            <div class="timer-box">Time: <span id="timer">60:00</span></div>
+        </div>
+
+        <!-- Question Grid Palette -->
+        <div class="palette-grid" id="palette-grid"></div>
+
+        <form id="quiz-form">
+            <button type="button" class="btn btn-flag" onclick="toggleFlag()">🚩 Flag/Unflag for Review</button>
+
+            <!-- 10 Questions Container -->
+            <div id="questions-container">
+                <div class="question-box" data-q="q1"><p class="question-text">1. Which of the following correctly pairs an internal formation process with an external formation process of landforms??</p><label class="option-label"><input type="radio" name="q1" value="A"> Volcanic activity — Tectonic plate movement </label><label class="option-label"><input type="radio" name="q1" value="B"> Water erosion — Wind erosion</label><label class="option-label"><input type="radio" name="q1" value="C"> Tectonic plate movement — Water erosion </label><label class="option-label"><input type="radio" name="q1" value="D"> Wind erosion — Volcanic activity </label></div>
+                <div class="question-box" data-q="q2"><p class="question-text">2. Africa accounts for approximately what percentage of the Earth’s total surface area and total land area, respectively?</p><label class="option-label"><input type="radio" name="q2" value="A"> 20% and 6% </label><label class="option-label"><input type="radio" name="q2" value="B"> 6% and 20% </label><label class="option-label"><input type="radio" name="q2" value="C">16% and 54%</label><label class="option-label"><input type="radio" name="q2" value="D"> 54% and 16% </label></div>
+                <div class="question-box" data-q="q3"><p class="question-text">3. A narrow strip of land that connects two larger landmasses is referred to as a?</p><label class="option-label"><input type="radio" name="q3" value="A"> Peninsula </label><label class="option-label"><input type="radio" name="q3" value="B"> Island </label><label class="option-label"><input type="radio" name="q3" value="C"> Isthmus</label><label class="option-label"><input type="radio" name="q3" value="D"> Basin</label></div>
+                <div class="question-box" data-q="q4"><p class="question-text">4. The Atlas Mountain system (African Alpine System) extends across which region of Africa?</p><label class="option-label"><input type="radio" name="q4" value="A"> From Ethiopia to Eritrea </label><label class="option-label"><input type="radio" name="q4" value="B"> From Morocco to Tunisia </label><label class="option-label"><input type="radio" name="q4" value="C"> Across the Kalahari and Namib deserts</label><label class="option-label"><input type="radio" name="q4" value="D"> Along the South African escarpment </label></div>
+                <div class="question-box" data-q="q5"><p class="question-text">5. In the Sahara desert, sand dunes are known as _____ while flat sheets of pebbles are known as _____. ?</p><label class="option-label"><input type="radio" name="q5" value="A"> Erg / Reg</label><label class="option-label"><input type="radio" name="q5" value="B"> Reg / Erg</label><label class="option-label"><input type="radio" name="q5" value="C"> Sahel / Savanna</label><label class="option-label"><input type="radio" name="q5" value="D"> Massif / Rift</label></div>
+                <div class="question-box" data-q="q6"><p class="question-text">6. Which landform region serves as a transitional semiarid belt featuring grasslands and savannahs located immediately south of the Sahara Desert?</p><label class="option-label"><input type="radio" name="q6" value="A"> The Tropical Rainforest </label><label class="option-label"><input type="radio" name="q6" value="B"> The Savanna  </label><label class="option-label"><input type="radio" name="q6" value="C"> The African Alpine System </label><label class="option-label"><input type="radio" name="q6" value="D"> The Sahel </label></div>
+                <div class="question-box" data-q="q7"><p class="question-text">7. The Ukhahlamba (Drakensberg) escarpment is located in which major landform region of Africa?</p><label class="option-label"><input type="radio" name="q7" value="A"> African Massif </label><label class="option-label"><input type="radio" name="q7" value="B"> Southern Africa Platform </label><label class="option-label"><input type="radio" name="q7" value="C"> East African Highlands </label><label class="option-label"><input type="radio" name="q7" value="D"> African Alpine System </label></div>
+                <div class="question-box" data-q="q8"><p class="question-text">8. Which of the following is an example of a minor landform?</p><label class="option-label"><input type="radio" name="q8" value="A"> Plateau</label><label class="option-label"><input type="radio" name="q8" value="B"> Plain</label><label class="option-label"><input type="radio" name="q8" value="C"> Gorge </label><label class="option-label"><input type="radio" name="q8" value="D"> Mountain</label></div>
+                <div class="question-box" data-q="q9"><p class="question-text">9. Primary reason for studying human population?</p><label class="option-label"><input type="radio" name="q9" value="A"> Wildlife</label><label class="option-label"><input type="radio" name="q9" value="B"> Available labor force</label><label class="option-label"><input type="radio" name="q9" value="C"> Tectonic plates</label><label class="option-label"><input type="radio" name="q9" value="D"> Ocean depth</label></div>
+                <div class="question-box" data-q="q10"><p class="question-text">10. Ratio between males and females in a population?</p><label class="option-label"><input type="radio" name="q10" value="A"> Age Ratio</label><label class="option-label"><input type="radio" name="q10" value="B"> Dependency Ratio</label><label class="option-label"><input type="radio" name="q10" value="C"> Sex Ratio</label><label class="option-label"><input type="radio" name="q10" value="D"> Growth Ratio</label></div>
+            </div>
+
+            <div class="nav-buttons">
+                <button type="button" class="btn btn-nav" id="prev-btn" onclick="prevQuestion()">◄ Previous</button>
+                <button type="button" class="btn btn-nav" id="next-btn" onclick="nextQuestion()">Next ►</button>
+                <button type="button" class="btn btn-submit" id="submit-btn" onclick="confirmSubmission()" style="display: none;">Submit Final Answers</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- RESULT SCREEN -->
+    <div id="result-screen" class="hidden">
+        <h1 style="text-align: center;">Exam Submitted</h1>
+        <div style="text-align: center; padding: 20px;">
+            <p style="font-size: 1.2rem;">Thank you, <span id="display-name"></span>.</p>
+            <p>ID: <span id="display-id"></span> | Section: <span id="display-section"></span></p>
+            <h2 id="final-score-display" style="color: var(--success); margin-top: 20px;"></h2>
+        </div>
+    </div>
+</div>
+
+<script>
+    let timerInterval;
+    let warningCount = 0;
+    let currentQuestionIndex = 0;
+    let questionsList = [];
+    const ACCESS_CODE = "{{ access_code }}";
+
+    // Anti-Cheating Keyblockers & Visibility Tracker
+    document.addEventListener("keydown", (e) => {
+        if (e.ctrlKey || e.key === "F12") e.preventDefault();
+    });
+
+    document.addEventListener("visibilitychange", () => {
+        if (document.hidden && !document.getElementById('exam-screen').classList.contains('hidden')) {
+            warningCount++;
+            alert(`WARNING ${warningCount}/3: Do not leave the exam tab!`);
+            if (warningCount >= 3) submitExam(); 
+        }
+    });
+
+    document.addEventListener("fullscreenchange", () => {
+        if (!document.fullscreenElement && !document.getElementById('exam-screen').classList.contains('hidden')) {
+            warningCount++;
+            alert(`WARNING ${warningCount}/3: You exited fullscreen mode!`);
+            if (warningCount >= 3) submitExam();
+        }
+    });
+
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    function startExam() {
+        const name = document.getElementById('studentName').value.trim();
+        const idNum = document.getElementById('studentID').value.trim();
+        const section = document.getElementById('classSection').value;
+        const code = document.getElementById('accessCode').value.trim();
+
+        if (name.length > 2 && idNum !== "" && section !== "" && code === ACCESS_CODE) {
+            // Request Fullscreen
+            document.documentElement.requestFullscreen().catch(() => {});
+
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('exam-screen').classList.remove('hidden');
+            document.getElementById('welcome-user').innerText = `ID: ${idNum} | ${name} (${section})`;
+            
+            // Randomize Questions
+            const container = document.getElementById('questions-container');
+            questionsList = Array.from(container.querySelectorAll('.question-box'));
+            shuffleArray(questionsList);
+            questionsList.forEach(q => container.appendChild(q));
+
+            buildPalette();
+            showQuestion(0);
+            startTimer(60); 
+
+            // Attach Radio Change Listeners for Palette Updating
+            document.querySelectorAll('input[type="radio"]').forEach(radio => {
+                radio.addEventListener('change', () => updatePaletteStatus(currentQuestionIndex));
+            });
+        } else {
+            document.getElementById('login-error').style.display = 'block';
+        }
+    }
+
+    function buildPalette() {
+        const grid = document.getElementById('palette-grid');
+        grid.innerHTML = '';
+        questionsList.forEach((_, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'palette-btn';
+            btn.innerText = idx + 1;
+            btn.onclick = () => { currentQuestionIndex = idx; showQuestion(idx); };
+            grid.appendChild(btn);
+        });
+    }
+
+    function updatePaletteStatus(idx) {
+        const btn = document.getElementById('palette-grid').children[idx];
+        const qBox = questionsList[idx];
+        const hasSelection = qBox.querySelector('input[type="radio"]:checked');
+        if (hasSelection) btn.classList.add('answered');
+    }
+
+    function toggleFlag() {
+        const btn = document.getElementById('palette-grid').children[currentQuestionIndex];
+        btn.classList.toggle('flagged');
+    }
+
+    function showQuestion(index) {
+        questionsList.forEach((q, i) => {
+            q.classList.remove('active');
+            const btn = document.getElementById('palette-grid').children[i];
+            btn.classList.remove('active');
+            if (i === index) {
+                q.classList.add('active');
+                btn.classList.add('active');
+            }
+        });
+        document.getElementById('prev-btn').style.display = (index === 0) ? 'none' : 'block';
+        if (index === questionsList.length - 1) {
+            document.getElementById('next-btn').style.display = 'none';
+            document.getElementById('submit-btn').style.display = 'block';
+        } else {
+            document.getElementById('next-btn').style.display = 'block';
+            document.getElementById('submit-btn').style.display = 'none';
+        }
+    }
+
+    function nextQuestion() { if (currentQuestionIndex < questionsList.length - 1) { currentQuestionIndex++; showQuestion(currentQuestionIndex); } }
+    function prevQuestion() { if (currentQuestionIndex > 0) { currentQuestionIndex--; showQuestion(currentQuestionIndex); } }
+
+    function startTimer(minutes) {
+        let time = minutes * 60;
+        const display = document.getElementById('timer');
+        timerInterval = setInterval(() => {
+            let mins = Math.floor(time / 60);
+            let secs = time % 60;
+            display.innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+            if (time <= 0) { clearInterval(timerInterval); submitExam(); }
+            time--;
+        }, 1000);
+    }
+
+    function confirmSubmission() { if(confirm("Are you sure you want to submit your final answers?")) submitExam(); }
+
+    async function submitExam() {
+        clearInterval(timerInterval);
+        const name = document.getElementById('studentName').value;
+        const idNum = document.getElementById('studentID').value;
+        const section = document.getElementById('classSection').value;
+
+        // FIXED: Robust answer collection using querySelector
+        const studentAnswers = {};
+        for (let i = 1; i <= 10; i++) {
+            const checkedOption = document.querySelector(`input[name="q${i}"]:checked`);
+            if (checkedOption) {
+                studentAnswers[`q${i}`] = checkedOption.value;
+            }
+        }
+
+        try {
+            const response = await fetch('/submit-exam', {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    name: name,
+                    id: idNum,
+                    section: section,
+                    answers: studentAnswers,
+                    violations: warningCount
+                })
+            });
+
+            const resData = await response.json();
+            document.getElementById('exam-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+            document.getElementById('display-name').innerText = name;
+            document.getElementById('display-id').innerText = idNum;
+            document.getElementById('display-section').innerText = section;
+
+            if (response.ok) {
+                document.getElementById('final-score-display').innerText = `Grade: ${resData.percentage}% (${resData.score}/${resData.total})`;
+            } else {
+                document.getElementById('final-score-display').innerText = resData.message || "Error submitting exam.";
+            }
+        } catch (e) {
+            alert("Connection error during submission.");
+        }
+    }
+</script>
+</body>
+</html>
